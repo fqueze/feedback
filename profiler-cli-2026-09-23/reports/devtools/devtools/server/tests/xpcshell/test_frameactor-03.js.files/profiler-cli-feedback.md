@@ -1,0 +1,3 @@
+## test_frameactor-03.js (2026-09-22)
+
+- **Question: "when, in this job's resource-usage profile, did test outcomes flip from PASS to TIMEOUT/FAIL, and which tests were in flight then?"** I needed a Python script over `profiler-cli thread markers --session <s> --search name:test --list --limit 0 --json` to bucket `test` markers by start/end time and status, and to list the markers overlapping t=45.7 s. Expected: `--group-by field:status` combined with a time histogram, or an "overlapping t" filter on `--list` for interval markers. Got: the aggregate view gives counts per name only, and `--list` over 1,389 markers without a time grouping. Could show: `thread markers --search name:test --group-by field:status --buckets 5s`, or similar.

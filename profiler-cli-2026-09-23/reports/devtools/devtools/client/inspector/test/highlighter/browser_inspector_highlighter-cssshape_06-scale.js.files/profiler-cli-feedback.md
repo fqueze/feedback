@@ -1,0 +1,6 @@
+
+## review-browser_inspector_highlighter-cssshape_06-scale.js (profiler-cli 0.9.0)
+
+- **Question: in which order did these markers happen, to the millisecond?** `profiler-cli thread markers --search "DOMEvent,DevTools:RDP" --list --limit 0 --session S` prints the start of each row as `t=2m13s` once the profile is over a minute long, so a race between markers a few ms apart (a debounce timer vs. a mousedown, 133.6157 vs 133.6301) cannot be read from it. Workaround: `--json` and a script printing `flatMarkers[].start`. Expected: `t=133.616s` (ms precision) in the list, as for short profiles.
+- `profiler-cli load <raw Taskcluster profile URL> --session S` selected `t-77` (a "Web Content (4/4)" GeckoMain), not the parent process main thread, so my next `thread markers --search` on the parent returned "No markers match" with no hint the thread was wrong. Expected: parent GeckoMain selected by default, as the profiler UI does. Workaround: `thread select t-0`.
+- `marker info m-1 --json` returns the marker object, while `marker info m-1 m-2 --json` returns `{"markers": [...]}`; a script written for one breaks on the other (`KeyError: 'start'`). Expected: one shape, or the list form always.

@@ -1,0 +1,6 @@
+
+## review: how much CPU did the main thread get between two samples, and when was each sample taken?
+
+- Command: `profiler-cli zoom push 57.495,57.530` then `profiler-cli thread info`. Expected: the thread's CPU in that window. Got: "No significant activity." However, `thread info --json` on a slightly wider zoom (57.485,57.531) gives `cpuActivity` 57.491s–57.529s = 16.75 ms, the key fact (the thread was off the CPU for 21 of 38 ms). The text output hides CPU below its threshold, and it gives no per-sample times. Workaround: locating the three samples in the window took 18 `zoom push` + `samples-bottom-up` bisections at 2 ms steps. A per-sample list (time, CPU delta, leaf) for a zoomed range would answer both questions in one call.
+- In that same JSON, `cpuActivity[].startTime` (57501.385) and its own `startTimeStr` ("57.491s") are 10.4 ms apart. `marker info --json` `start` values match their displayed times, so the two JSON outputs use different zeros under one field name.
+- Session `review-browser_dbg-keyboard-navigation.js-1` died during `thread info`. Its log ends at "Received message: command" and shows no error. The next call said "The daemon exited without cleaning up". Swap on the machine was full (7/7 GB), so the OOM killer is a likely cause. Workaround: reload.

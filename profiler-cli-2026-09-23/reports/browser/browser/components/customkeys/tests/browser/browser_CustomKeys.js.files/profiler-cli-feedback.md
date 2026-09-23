@@ -1,0 +1,10 @@
+
+## browser_CustomKeys.js (2026-09-22)
+
+- **Question: "which process sent the `[BrowserTestUtils] load` message".** Command: `profiler-cli profile markers --session S --search "[BrowserTestUtils] load"` (also `"BrowserTestUtils] load"`). Expected: the JSActor SendAsyncMessage/ReceiveMessage markers, which `thread markers --list` prints exactly as `[BrowserTestUtils] load`. Got: `No markers match the specified filters (searched 20 threads)`. The displayed label is built from two payload fields (`actor`, `name`), so a search on the text you see matches nothing. Workaround: search `SendAsyncMessage` on each content thread in a zoom and read the list. Searching the displayed label as well would have answered it.
+- **Question: "was the machine saturated between browser time A and B".** The resource-usage profile has `No counters`, and CPU is one `CPU Use` marker per 100 ms. Command: `thread markers --search "name:CPU Use" --list --limit 0` after a `zoom push`. Got: rows of `CPU Use  t=3m9s  94ms`, with no percentage. I needed `--json` and a script to see the cpu/user/system percentages over time, and another to line them up with the per-test profile's clock (the offset between the two is not shown anywhere). What would have answered it: the percentage in the list row, or a `counter`-style sparkline over the zoom for the CPU Use markers.
+
+## browser_CustomKeys.js review (2026-09-22)
+
+- Hit both entries above again while reviewing: they cost the reviewer the same calls. The label-vs-search mismatch also affects `Subprocess Priority` markers: `thread markers --search "UNKNOWN -> PREALLOC"` finds nothing, though the list prints `priority of child 7,508: UNKNOWN -> PREALLOC`. Workaround: `--search "Subprocess Priority"` and read the list.
+- In the resource-usage profile (22 min long), `--list` times are rounded to the second (`t=3m9s`) for every row, so 30 consecutive `CPU Use` rows look identical. Millisecond-precision times, or times relative to the zoom start, would have avoided the JSON script.

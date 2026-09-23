@@ -1,0 +1,3 @@
+## Question: "was the machine saturated while this test ran, compared with the rest of the job?"
+- Command: `profiler-cli zoom push <a>,<b>` then `thread markers --search "name:CPU Use" --list --limit 0 --json`, and a Python script to compute a duration-weighted average of `data.cpuPercent`.
+- What would have answered it: an aggregate of the CPU Use markers' numeric fields over the zoom range (mean/min/max, fraction of time above 95%), e.g. in `thread markers` stats for markers with numeric payloads, or in `profile info` for resource-usage profiles, which currently says "No significant activity" and lists no counters.

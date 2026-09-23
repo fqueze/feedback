@@ -1,0 +1,7 @@
+## Daemon dies silently while loading a large xpcshell per-test profile
+
+- Command: `PROFILER_CLI_SESSION_OWNER=languagePackUpdates.js profiler-cli load https://firefox-ci-tc.services.mozilla.com/api/queue/v1/task/Bg0aTos7RBKg95nKnnD5gw/runs/0/artifacts/public/test_info/profile_languagePackUpdates-2.js.json --session languagePackUpdates.js-2`
+- Expected: the profile loads (59 MB gzipped), or an error saying it is too large / out of memory.
+- Got: `Error: Session languagePackUpdates.js-2 is not reachable. ... The daemon exited without cleaning up.` The daemon log's last line is `Fetching profile from ...`; no error is logged. The sibling profile (`profile_languagePackUpdates.js.json`, 53 MB gzipped, 8,060,879 markers on one thread, almost all `Runnable DummyEvent` and `TaskController::AddTask`) loaded, and its daemon then used 4.6 GB RSS, far above the 0.6 GB the brief sizes on.
+- Workaround: stop the other session and retry (see below whether it worked).
+- Retried with no other session loaded: the daemon died again 3 s after `Fetching profile from ...`, with nothing in its log. Downloading it by hand shows why: the file is 59 MB gzipped but 880 MB of JSON once decompressed (`curl --compressed`), more than V8's maximum string length (about 512 MB), so it presumably cannot be parsed as one string. The error should say so, and ideally the loader should stream-parse. I read this profile with a Python script over the downloaded JSON instead, so the observations from it have no profiler links.
