@@ -1,0 +1,5 @@
+## Question: "in the failing executions of this test, does message X (a known-fail) always come with failure Y?"
+- Command: `fx-tests task <id> --messages` for each failing task (reused a sibling agent's 150 outputs), then a shell/awk script counting, per job, `handleEvent() was unable to perform a11y checks on hidden node: id: , tagName: button, className: button` against `Node is not accessible via accessibility API: id: main-button`.
+- Expected: a way to list, per failing execution, the set of messages (including TEST-KNOWN-FAIL ones), so co-occurrence can be read off directly (e.g. `fx-tests test <path> --messages-by-execution` or `--cooccur "<msg>"`).
+- Got: messages are aggregated per test per job ("1x", "2x"), per-test block text only; the correlation needed parsing 150 files. The per-job block also mixes messages of other tests in the same job, so a file-wide grep mis-attributed 2 jobs (their `Node is not accessible` came from `browser_settings_enable_backup_encryption.js`).
+- Could have shown: per-execution message sets, with known-fails tagged, for one test across all its failing jobs.

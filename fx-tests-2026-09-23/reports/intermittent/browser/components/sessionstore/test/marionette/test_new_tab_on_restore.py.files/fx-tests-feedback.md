@@ -1,0 +1,5 @@
+## Question: what fails, and how often, for a Marionette test?
+
+- `fx-tests test browser/components/sessionstore/test/marionette/test_new_tab_on_restore.py` -> "No test path in the xpcshell and mochitest 21-day data contains ...". Expected: rates per config, as for the other harnesses. Workaround: Treeherder `api/failuresbybug/?bug=2054836&startday=...` (530 rows back to July) plus every task's `marionette_errorsummary.log`, classified by a script.
+- `fx-tests task X8o3B_GAQJKdgwrJvIaLDQ --profiles` -> "0 tests, 0 executions ... This profile records no tests at all. Either the job is not a test job, or the harness died before it ran one". The job ran ~580 tests; Marionette's resource-usage profile just has no test markers. Saying "Marionette jobs record no test markers" would avoid the wrong lead.
+- `fx-tests intermittent --bug 2054836` -> "Failure messages, per annotated job" lists 2 messages for 41 jobs, both from other tests. The 39 others had empty `lines` in Treeherder; the job's `marionette_errorsummary.log` has the message. Expected: the messages from the errorsummary, or a count of jobs with no message.

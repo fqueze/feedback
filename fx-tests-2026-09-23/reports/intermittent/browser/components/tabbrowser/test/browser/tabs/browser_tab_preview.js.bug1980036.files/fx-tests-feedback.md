@@ -1,0 +1,9 @@
+## Question: "which failing jobs also have a profile from earlier in the same browser session"
+- Context: this test's per-test profile buffer starts ~2 min before the failure, after the state that breaks it was created. A failure of another test from the same manifest, earlier in manifest order, gives a profile that covers the session start.
+- Command: a shell loop running `fx-tests task <id>` over 60 task ids from `fx-tests test <path> --task-ids --issue 1`, grepping for jobs with more than one failing test.
+- What the output could have shown: in `fx-tests test <path> --task-ids`, next to each task, the other tests that failed in the same job (or an option such as `--with-other-failures`), ideally flagged when they are in the same manifest and ran earlier.
+
+## Question: "which tests ran in the same browser as this failure" (review-browser_tab_preview.js.bug1980036)
+- Context: the report took a leaker from another failing test's profile in the same job (aKWKSvl9, `browser_ctrlTab.js`). But the harness had relaunched Firefox after that test timed out, so the leaker never ran in the failing test's browser. That refuted the report's Kind.
+- Command: `fx-tests task aKWKSvl9T2y6CCtKXAG3gA --profiles` lists the failures and profiles, but not the browser launches. Workaround: load the resource-usage profile, find the "runtests.py | Application ran for" / "Browser Chrome Test Summary" markers, and set them against the `test` markers. Then compare the parent pid and "Started" of each per-test profile (`profile info`, `profile meta`).
+- What the output could have shown: tests grouped by browser launch in `fx-tests task`, or a note such as "browser relaunched after <test> timed out" next to each failure. The per-test profiles from the same browser as a given failure could have been flagged too.

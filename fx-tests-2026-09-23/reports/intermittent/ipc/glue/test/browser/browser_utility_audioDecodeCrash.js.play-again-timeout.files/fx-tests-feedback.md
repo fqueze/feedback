@@ -1,0 +1,6 @@
+## Question: "which of this test's timeouts are the same failure?" (browser_utility_audioDecodeCrash.js, play-again timeout)
+
+- Command: `fx-tests test ipc/glue/test/browser/browser_utility_audioDecodeCrash.js --task-ids --limit 0 --issue 3`
+- Expected: the 17 `TIMEOUT` runs split by what the test was doing when it hung (its last log line before the timeout), or at least by message: they are three different things.
+- Got: one issue, `TIMEOUT Test exceeded time limit`, for 14 Windows `Test timed out` after `Play tab again`, 3 Linux `application timed out after 370.0 seconds with no output` right after `Crash Utility Process`, plus 2 of the Windows jobs whose other run was the `There should be a dumpID` mode. Workaround: downloaded the 17 `live_backing.log` and grepped the buffered test output before each timeout.
+- The decisive evidence for this mode was also only in the task log, not in any profile: MOZ_PROCESS_LOG's `==> process X launched child process Y (... -sandboxingKind 0 ...)` list printed by zombiecheck, and `Process Y may be hanging at shutdown` / `hanging at shutdown; attempting crash report`. A `fx-tests task <id> --log-grep <re>` (or surfacing `hanging at shutdown` lines per job) would have found it without downloading 100 MB of logs.

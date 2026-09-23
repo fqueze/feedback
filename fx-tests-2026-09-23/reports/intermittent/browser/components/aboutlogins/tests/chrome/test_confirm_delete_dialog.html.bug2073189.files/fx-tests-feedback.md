@@ -1,0 +1,9 @@
+## Killed-for-max-run-time jobs hide a perma failure, and `task --profiles` refuses them though their per-test profiles exist
+
+- Command: `fx-tests test browser/components/aboutlogins/tests/chrome/test_confirm_delete_dialog.html` (and `--coverage`, `--history --config test-macosx1500-aarch64-vms/opt-mochitest-chrome-1proc`)
+- Expected: the 25 sheriff-annotated failures of bug 2073189 on test-macosx1500-aarch64-vms/opt-mochitest-chrome-1proc (2026-09-17 to 09-21) to show up, or at least a warning that jobs on that config were excluded.
+- Got: "314 runs, 314 pass, 0 fail" on that config, verdict driven only by 2 unrelated Linux failures. Every annotated job exceeded its 3600 s max-run-time and was killed, so it has no finished resource-usage profile and the index silently drops it. A config going from "passes" to "every job killed" reads as healthy.
+- Then: `fx-tests task d6XM1k2_Sjquqb1U6OjEpQ --profiles` exits with "killed for exceeding its maximum duration ... there are no per-test results to read", but the task's artifact list has `profile_test_confirm_delete_dialog.html.json` and `-2.html.json` (and ~30 other per-test profiles), uploaded fine. The per-test failure profile URLs could be listed from the artifact list / log even when the resource-usage profile is partial.
+- Workaround: listed artifacts with `curl .../api/queue/v1/task/<id>/runs/0/artifacts`, and read the log for the failure lines.
+- Question it could have answered: "the profile URLs of this one occurrence" and "how many jobs of this config were killed / not indexed in the window".
+- Correction, found afterwards: `fx-tests intermittent --bug 2073189 --profiles` does list the per-test profile URLs of these killed jobs. The gap is that `fx-tests task <id> --profiles` does not fall back to the same source, and says there are none.

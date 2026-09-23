@@ -1,0 +1,2 @@
+- `fx-tests test <path> --since 2026-09-12 --task-ids` — expected: failures since that date (the natural reading after `--history` shows a step on a date). Got: `--since expects a non-negative integer`. Workaround: counted days back and used `--since 10`. Accepting a date (as `--day` does) would save the round trip.
+- `fx-tests test <path> --bugs` — expected: the bugs list. Got: the bugs list followed by the whole default report (configs table, Issues) again, which I had already read. Only the "Bugs naming this test" block was new.

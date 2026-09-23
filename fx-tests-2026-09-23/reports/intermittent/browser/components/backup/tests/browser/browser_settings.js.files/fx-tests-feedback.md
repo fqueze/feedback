@@ -1,0 +1,6 @@
+## Question: "what are this test's failure modes, and how many runs has each?"
+- Command: `fx-tests test browser/components/backup/tests/browser/browser_settings.js` (and `fx-tests task <id> --profiles`).
+- Expected: the Issues block to list the two real failure modes (`test_last_backup_info_and_location - Uncaught exception in test - NotFoundError: ... testLastBackupInfo` in 87 jobs; `test_restore_from_backup - Node is not accessible via accessibility API: id: main-button` in 63 jobs).
+- Got: a single row, `189x FAIL handleEvent() was unable to perform a11y checks on hidden node: id: main-button ...`. In the profile that message is a `TEST-KNOWN-FAIL` (expected), emitted on every run of the test, passing or failing. `fx-tests task` also leads each failing test with that same message. The known-fail hid both real failures, and made the whole test look like one a11y-checks problem, although most failing jobs do not run a11y checks at all.
+- Workaround: ran `fx-tests task <id> --messages` for all 150 failing tasks (`xargs -P 6`) and classified the messages with a Python script.
+- Could have shown: skip TEST-KNOWN-FAIL / expected-fail messages (and `changed preference:` known-fails) when picking the "first failure" of a run, or tag them as known-fail.
